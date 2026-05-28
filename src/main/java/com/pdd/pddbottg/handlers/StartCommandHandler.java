@@ -3,6 +3,7 @@ package com.pdd.pddbottg.handlers;
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.service.AuthService;
 import com.pdd.pddbottg.service.MessageSender;
+import com.pdd.pddbottg.service.TokenStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ public class StartCommandHandler implements UpdateHandler {
 
     private final MessageSender messageSender;
     private final AuthService authService;
+    private final TokenStorageService tokenStorageService;
 
     @Value("${bot.message.start}")
     private String startMessage;
@@ -28,7 +30,12 @@ public class StartCommandHandler implements UpdateHandler {
                 String telegramId = String.valueOf(update.getMessage().getFrom().getId());
                 String  token = authService.registerUser(telegramId, firstName);
 
-                messageSender.sendMessage(bot, chatId, startMessage + " " + token);
+                tokenStorageService.SaveToken(telegramId, token);
+
+                String message = tokenStorageService.GetJwtToken(telegramId).orElseThrow(() -> new RuntimeException("Токен не найден"));;
+
+
+                messageSender.sendMessage(bot, chatId, startMessage + " Ваш токен: " + message);
 
                 return true;
             }
