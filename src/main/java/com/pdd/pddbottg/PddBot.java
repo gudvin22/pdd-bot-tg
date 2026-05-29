@@ -1,5 +1,7 @@
 package com.pdd.pddbottg;
 
+import com.pdd.pddbottg.handlers.RandomExamHandler;
+import com.pdd.pddbottg.handlers.StartCommandHandler;
 import com.pdd.pddbottg.handlers.UpdateHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +14,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 @RequiredArgsConstructor
 public class PddBot extends TelegramLongPollingBot {
-    private final UpdateHandler updateHandler;
+    //private final UpdateHandler updateHandler;
+    private final RandomExamHandler randomExamHandler;
+    private final StartCommandHandler startCommandHandler;
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -32,7 +36,9 @@ public class PddBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        updateHandler.handle(this, update);
+        if (!startCommandHandler.handle(this, update)) {
+            randomExamHandler.handle(this, update);
+        }
 
     }
 

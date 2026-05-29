@@ -4,7 +4,7 @@ import com.pdd.pddbottg.entity.BotTokenEntity;
 import com.pdd.pddbottg.repository.BotTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.http.HttpHeaders;
 import java.util.Optional;
 
 @Service
@@ -23,8 +23,16 @@ public class TokenStorageService {
 
     }
 
-    public Optional<String>GetJwtToken(String telegramId) {
+    public Optional<String>getJwtToken(String telegramId) {
         return botTokenRepository.findByTelegramId(telegramId)
                 .map(BotTokenEntity::getJwtToken);
+    }
+
+    public HttpHeaders createAuthHeaders(String telegramId) {
+        String token = getJwtToken(telegramId)
+                .orElseThrow(() -> new RuntimeException("Токен не найден"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        return headers;
     }
 }
