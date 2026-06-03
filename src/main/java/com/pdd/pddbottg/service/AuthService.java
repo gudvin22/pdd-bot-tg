@@ -18,7 +18,7 @@ public class AuthService {
 
 
     public String registerUser(String telegramId, String userName) {
-        String url = serverAddress + "api/auth/telegram-register";
+        String url = serverAddress + "/api/auth/telegram-register";
 
         TelegramRegistrationDto dto = new TelegramRegistrationDto();
         dto.setTelegramId(telegramId);
