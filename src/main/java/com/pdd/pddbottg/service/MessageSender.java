@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class MessageSender {
         }
     }
 
-    public void SendQuestionInline(PddBot bot, Long chatId, String questionText, List<String> answers) {
+    public void sendQuestionInline(PddBot bot, Long chatId, String questionText, List<String> answers) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(questionText);
@@ -65,17 +66,30 @@ public class MessageSender {
         }
     }
 
-    public void sendFoto(PddBot bot, Long chatId, String imageUrl) {
+    public void sendFoto(PddBot bot, Long chatId, String imageUrl) throws IOException {
 
         String fullImageUrl = serverAddress + imageUrl;
-
-        System.out.println("fullImageUrl: " + fullImageUrl);
         SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setPhoto(new InputFile(fullImageUrl));
+        sendPhoto.setChatId(chatId.toString());
+
+        //отправка файла напрямую пока localhost для тестов,
+        // при деплое удалить вместе с папкой static.images-bilety
+        if(serverAddress.contains("localhost")){
+            String fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("static/images-bilety/" + fileName);
+            InputFile inputFile = new InputFile(resource.getInputStream(), fileName);
+            sendPhoto.setPhoto(inputFile);
+        }   else  {
+            //------------------------------------------------------
+            sendPhoto.setPhoto(new InputFile(fullImageUrl));
+        }
+
         try {
             bot.execute(sendPhoto);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
+
+
 }

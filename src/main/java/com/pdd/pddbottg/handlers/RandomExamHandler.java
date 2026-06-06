@@ -5,6 +5,7 @@ import com.pdd.pddbottg.dto.ExamResponseDto;
 import com.pdd.pddbottg.dto.QuestionDto;
 import com.pdd.pddbottg.entity.ExamSession;
 import com.pdd.pddbottg.service.MessageSender;
+import com.pdd.pddbottg.service.SessionStorage;
 import com.pdd.pddbottg.service.TicketProcessingService;
 import com.pdd.pddbottg.service.TokenStorageService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RandomExamHandler implements UpdateHandler {
     private final MessageSender messageSender;
     private final TicketProcessingService ticketProcessingService;
-    private final Map<Long, ExamSession> sessionsMap = new ConcurrentHashMap<>();
+    private final SessionStorage sessionStorage;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -39,20 +40,21 @@ public class RandomExamHandler implements UpdateHandler {
                 try {
                     String json = ticketProcessingService.randomExam(telegramId, firstName);
                     ExamResponseDto ticketResponse = objectMapper.readValue(json, ExamResponseDto.class);
-                    messageSender.sendMessage(bot, chatId, "Загружено вопросов: " +
-                            ticketResponse.getQuestions().size() + "\nБилет номер: " +
-                            ticketResponse.getTicketNumber());
+                    messageSender.sendMessage(bot, chatId, "Билет номер: " + ticketResponse.getTicketNumber() +
+                            "\nВопрос номер: 1");
                     ExamSession sessionMap = new ExamSession(ticketResponse.getTicketNumber(), ticketResponse.getQuestions());
-                    sessionsMap.put(chatId, sessionMap);
+                    sessionStorage.putSession(chatId, sessionMap);
 
                     //потестим клаву
                     QuestionDto question1 = ticketResponse.getQuestions().get(0);
                     String imageUrl = question1.getImageUrlSmall();
+
+
                     if(imageUrl != null && !imageUrl.isEmpty()) {
                         messageSender.sendFoto(bot, chatId, imageUrl);
                     }
 
-                    messageSender.SendQuestionInline(bot, chatId, question1.getQuestionText(), question1.getAnswersText());
+                    messageSender.sendQuestionInline(bot, chatId, question1.getQuestionText(), question1.getAnswersText());
 
 
                 } catch (Exception e) {

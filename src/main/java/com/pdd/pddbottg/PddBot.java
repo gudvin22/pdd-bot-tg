@@ -1,5 +1,6 @@
 package com.pdd.pddbottg;
 
+import com.pdd.pddbottg.handlers.CallbackHandler;
 import com.pdd.pddbottg.handlers.RandomExamHandler;
 import com.pdd.pddbottg.handlers.StartCommandHandler;
 import com.pdd.pddbottg.handlers.UpdateHandler;
@@ -17,6 +18,7 @@ public class PddBot extends TelegramLongPollingBot {
     //private final UpdateHandler updateHandler;
     private final RandomExamHandler randomExamHandler;
     private final StartCommandHandler startCommandHandler;
+    private final CallbackHandler callbackHandler;
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -36,10 +38,9 @@ public class PddBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (!startCommandHandler.handle(this, update)) {
-            randomExamHandler.handle(this, update);
-        }
-
+        startCommandHandler.handle(this, update);
+        randomExamHandler.handle(this, update);
+        callbackHandler.handle(this, update);
     }
 
 
