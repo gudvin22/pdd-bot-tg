@@ -23,7 +23,7 @@ public class TokenStorageService {
 
     }
 
-    public Optional<String>getJwtToken(String telegramId) {
+    private Optional<String>getJwtToken(String telegramId) {
         return botTokenRepository.findByTelegramId(telegramId)
                 .map(BotTokenEntity::getJwtToken);
     }

@@ -40,8 +40,8 @@ public class RandomExamHandler implements UpdateHandler {
                 try {
                     String json = ticketProcessingService.randomExam(telegramId, firstName);
                     ExamResponseDto ticketResponse = objectMapper.readValue(json, ExamResponseDto.class);
-                    messageSender.sendMessage(bot, chatId, "Билет номер: " + ticketResponse.getTicketNumber() +
-                            "\nВопрос номер: 1");
+                    messageSender.sendMessage(bot, chatId, "Билет № " + ticketResponse.getTicketNumber() +
+                            "\nВопрос № 1");
                     ExamSession sessionMap = new ExamSession(ticketResponse.getTicketNumber(), ticketResponse.getQuestions());
                     sessionStorage.putSession(chatId, sessionMap);
 

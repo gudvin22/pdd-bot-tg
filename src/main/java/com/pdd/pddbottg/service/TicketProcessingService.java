@@ -1,6 +1,8 @@
 package com.pdd.pddbottg.service;
 
 import com.pdd.pddbottg.PddBot;
+import com.pdd.pddbottg.dto.ExamCheckRequestDto;
+import com.pdd.pddbottg.entity.ExamSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -22,59 +24,64 @@ public class TicketProcessingService {
     @Value("${bot.message.responseRandomTicket}")
     private String responseRandomTicket;
 
-
     private final RestTemplate restTemplate;
     private final TokenStorageService tokenStorageService;
     private final AuthService authService;
     private final MessageSender messageSender;
+    private final SessionStorage sessionStorage;
+
 
     public String randomExam(String telegramId, String userName) {
         String url = serverAddress + "/api/exam/random";
+        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        return response.getBody();
+    }
+
+    public void checkExam(PddBot bot, String telegramId, String userName, Long chatId) {
+        String url = serverAddress + "/api/exam/check";
+        ExamSession session = sessionStorage.getSession(chatId);
+        if (session == null) {
+            messageSender.sendMessage(bot, chatId, "Начните экзамен сначала");
+            return;
+        }
+
+        ExamCheckRequestDto requestDto = new ExamCheckRequestDto();
+        requestDto.setTicketNumber(session.getTicketNumber());
+        requestDto.setAnswers(session.getUserAnswers());
+
+
+        try {
+            ResponseEntity<String> response = executeWithAuth(url, HttpMethod.POST, requestDto, telegramId, userName);
+            String result = response.getBody(); // Это JSON-список WrongAnswerDto
+            // TODO: распарсить result и сформировать сообщение
+            messageSender.sendMessage(bot, chatId, responseRandomTicket + result);
+        } catch (Exception e) {
+            messageSender.sendMessage(bot, chatId, "Ошибка проверки: " + e.getMessage());
+        } finally {
+            sessionStorage.removeSession(chatId);
+        }
+
+    }
+
+    private ResponseEntity<String> executeWithAuth(String url, HttpMethod method, Object body, String telegramId, String userName) {
         try {
             HttpHeaders headers = tokenStorageService.createAuthHeaders(telegramId);
-            HttpEntity<?> entity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            return response.getBody();
+            HttpEntity<?> entity = (body == null) ? new HttpEntity<>(headers) : new HttpEntity<>(body, headers);
+            return restTemplate.exchange(url, method, entity, String.class);
         } catch (HttpClientErrorException.Forbidden e) {
-            // 1. Получить новый токен
+            // Обновляем токен
             String newToken = authService.registerUser(telegramId, userName);
-            // 2. Сохранить новый токен в БД
             tokenStorageService.SaveToken(telegramId, newToken);
-            // 3. Повторить запрос с новым токеном
+            // Повторяем запрос с новым токеном
             HttpHeaders newHeaders = tokenStorageService.createAuthHeaders(telegramId);
-            HttpEntity<?> newEntity = new HttpEntity<>(newHeaders);
-            ResponseEntity<String> retryResponse = restTemplate.exchange(url, HttpMethod.GET, newEntity, String.class);
-            return retryResponse.getBody();
+            HttpEntity<?> retryEntity = (body == null) ? new HttpEntity<>(newHeaders) : new HttpEntity<>(body, newHeaders);
+            return restTemplate.exchange(url, method, retryEntity, String.class);
         } catch (RestClientException e) {
             throw new RuntimeException("Ошибка при вызове API: " + e.getMessage(), e);
         }
     }
 
-    public void checkExam(PddBot bot, String telegramId, String userName, Long chatId) {
-        String url = serverAddress + "/api/exam/check";
-        //дописать логику
-//        try {
-//            HttpHeaders headers = tokenStorageService.createAuthHeaders(telegramId);
-//            HttpEntity<?> entity = new HttpEntity<>(headers);
-//            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-//            String answer = response.getBody();
-//        } catch (HttpClientErrorException.Forbidden e) {
-//            // 1. Получить новый токен
-//            String newToken = authService.registerUser(telegramId, userName);
-//            // 2. Сохранить новый токен в БД
-//            tokenStorageService.SaveToken(telegramId, newToken);
-//            // 3. Повторить запрос с новым токеном
-//            HttpHeaders newHeaders = tokenStorageService.createAuthHeaders(telegramId);
-//            HttpEntity<?> newEntity = new HttpEntity<>(newHeaders);
-//            ResponseEntity<String> retryResponse = restTemplate.exchange(url, HttpMethod.GET, newEntity, String.class);
-//            String answer = retryResponse.getBody();
-//        } catch (RestClientException e) {
-//            throw new RuntimeException("Ошибка при вызове API: " + e.getMessage(), e);
-//        }
-        // пока ничего не делаем отправляем в чат рандомное сообщение
-        messageSender.sendMessage(bot,chatId,responseRandomTicket);
 
-    }
 
 
 }

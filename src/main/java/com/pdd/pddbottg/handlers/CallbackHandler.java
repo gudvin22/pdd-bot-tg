@@ -51,7 +51,7 @@ public class CallbackHandler implements UpdateHandler{
                 QuestionDto question = session.getQuestions().get(session.getCurrentQuestionIndex());
                 String imageUrl = question.getImageUrlSmall();
 
-                messageSender.sendMessage(bot, chatId, "Вопрос номер: " + (session.getCurrentQuestionIndex() + 1));
+                messageSender.sendMessage(bot, chatId, "Вопрос № " + (session.getCurrentQuestionIndex() + 1));
 
                 try {
                     if(imageUrl != null && !imageUrl.isEmpty()) {
