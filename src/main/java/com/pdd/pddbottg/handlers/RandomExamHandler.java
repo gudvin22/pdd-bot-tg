@@ -54,7 +54,8 @@ public class RandomExamHandler implements UpdateHandler {
                         messageSender.sendFoto(bot, chatId, imageUrl);
                     }
 
-                    messageSender.sendQuestionInline(bot, chatId, question1.getQuestionText(), question1.getAnswersText());
+                    //messageSender.sendQuestionInline(bot, chatId, question1.getQuestionText(), question1.getAnswersText());
+                    messageSender.sendQuestionTextWithInline(bot, chatId, question1.getQuestionText(), question1.getAnswersText());
 
 
                 } catch (Exception e) {

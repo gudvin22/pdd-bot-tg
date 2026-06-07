@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,29 +36,6 @@ public class MessageSender {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(text);
-        message.setReplyMarkup(keyboard);
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendQuestionInline(PddBot bot, Long chatId, String questionText, List<String> answers) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-        message.setText(questionText);
-        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        for (int i = 0; i < answers.size(); i++) {
-            InlineKeyboardButton button = new InlineKeyboardButton();
-            button.setText(answers.get(i));
-            button.setCallbackData("answer_" + i);
-            List<InlineKeyboardButton> row = new ArrayList<>();
-            row.add(button);
-            rows.add(row);
-        }
-        keyboard.setKeyboard(rows);
         message.setReplyMarkup(keyboard);
         try {
             bot.execute(message);
@@ -90,6 +68,58 @@ public class MessageSender {
             e.printStackTrace();
         }
     }
+
+    public void sendQuestionInline(PddBot bot, Long chatId, String questionText, List<String> answers) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(questionText);
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        for (int i = 0; i < answers.size(); i++) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(answers.get(i));
+            button.setCallbackData("answer_" + i);
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            row.add(button);
+            rows.add(row);
+        }
+        keyboard.setKeyboard(rows);
+        message.setReplyMarkup(keyboard);
+        try {
+            bot.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendQuestionTextWithInline(PddBot bot, Long chatId, String questionText, List<String> answers) {
+        SendMessage message = new SendMessage();
+        StringBuilder textBuilder = new StringBuilder();
+        message.setChatId(chatId.toString());
+        message.setParseMode("HTML");
+        textBuilder.append("<b>").append(questionText).append("</b>");
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        for (int i = 0; i < answers.size(); i++) {
+            textBuilder.append("\n").append(i + 1).append(". ").append(answers.get(i));
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(String.valueOf((i + 1)));
+            button.setCallbackData("answer_" + i);
+            row.add(button);
+        }
+        message.setText(textBuilder.toString());
+        rows.add(row);
+        keyboard.setKeyboard(rows);
+        message.setReplyMarkup(keyboard);
+        try {
+            bot.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
 }

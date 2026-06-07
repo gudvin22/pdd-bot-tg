@@ -58,7 +58,8 @@ public class CallbackHandler implements UpdateHandler{
                         messageSender.sendFoto(bot, chatId, imageUrl);
                     }
 
-                    messageSender.sendQuestionInline(bot, chatId, question.getQuestionText(), question.getAnswersText());
+                    //messageSender.sendQuestionInline(bot, chatId, question.getQuestionText(), question.getAnswersText());
+                    messageSender.sendQuestionTextWithInline(bot, chatId, question.getQuestionText(), question.getAnswersText());
 
 
                 } catch (Exception e) {
