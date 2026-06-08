@@ -3,6 +3,7 @@ package com.pdd.pddbottg.handlers;
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.QuestionDto;
 import com.pdd.pddbottg.entity.ExamSession;
+import com.pdd.pddbottg.service.KeyboardService;
 import com.pdd.pddbottg.service.MessageSender;
 import com.pdd.pddbottg.service.SessionStorage;
 import com.pdd.pddbottg.service.TicketProcessingService;
@@ -19,9 +20,14 @@ public class CallbackHandler implements UpdateHandler{
     private final SessionStorage sessionStorage;
     private final MessageSender messageSender;
     private final TicketProcessingService ticketProcessingService;
+    private final KeyboardService keyboardService;
 
     @Value("${bot.message.responseRandomQuestion}")
     private String responseMessage;
+
+    @Value("${bot.message.responseRandomTicketErrorSession}")
+    private String responseRandomTicketErrorSession;
+
     @Override
     public boolean handle(PddBot bot, Update update) {
 
@@ -30,7 +36,7 @@ public class CallbackHandler implements UpdateHandler{
             String callbackData = update.getCallbackQuery().getData();
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {
-                messageSender.sendMessage(bot,chatId,"Начните экзамен сначала");
+                messageSender.sendMessageWithKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
                 return true;
             }
 

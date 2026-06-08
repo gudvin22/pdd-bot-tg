@@ -24,11 +24,15 @@ public class TicketProcessingService {
     @Value("${bot.message.responseRandomTicket}")
     private String responseRandomTicket;
 
+    @Value("${bot.message.responseRandomTicketErrorSession}")
+    private String responseRandomTicketErrorSession;
+
     private final RestTemplate restTemplate;
     private final TokenStorageService tokenStorageService;
     private final AuthService authService;
     private final MessageSender messageSender;
     private final SessionStorage sessionStorage;
+    private final KeyboardService keyboardService;
 
 
     public String randomExam(String telegramId, String userName) {
@@ -41,7 +45,8 @@ public class TicketProcessingService {
         String url = serverAddress + "/api/exam/check";
         ExamSession session = sessionStorage.getSession(chatId);
         if (session == null) {
-            messageSender.sendMessage(bot, chatId, "Начните экзамен сначала");
+            messageSender.sendMessageWithKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+
             return;
         }
 
