@@ -1,7 +1,9 @@
 package com.pdd.pddbottg.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.ExamCheckRequestDto;
+import com.pdd.pddbottg.dto.WrongAnswerDto;
 import com.pdd.pddbottg.entity.ExamSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,15 +16,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TicketProcessingService {
 
     @Value("${myserver.address}")
     private String serverAddress;
-
-    @Value("${bot.message.responseRandomTicket}")
-    private String responseRandomTicket;
 
     @Value("${bot.message.responseRandomTicketErrorSession}")
     private String responseRandomTicketErrorSession;
@@ -57,9 +58,16 @@ public class TicketProcessingService {
 
         try {
             ResponseEntity<String> response = executeWithAuth(url, HttpMethod.POST, requestDto, telegramId, userName);
-            String result = response.getBody(); // Это JSON-список WrongAnswerDto
-            // TODO: распарсить result и сформировать сообщение
-            messageSender.sendMessage(bot, chatId, responseRandomTicket + result);
+            ObjectMapper mapper = new ObjectMapper();
+            List<WrongAnswerDto> wrongAnswers = mapper.readValue(
+                    response.getBody(),
+                    mapper.getTypeFactory().constructCollectionType(List.class, WrongAnswerDto.class)
+            );
+            if (wrongAnswers.isEmpty()) {
+                messageSender.sendMessage(bot, chatId, "Все правильно, поздравляю!");
+
+            }
+            messageSender.sendMessage(bot, chatId, "У тебя " + wrongAnswers.size() + " ошибок. Давай разберем их?");
         } catch (Exception e) {
             messageSender.sendMessage(bot, chatId, "Ошибка проверки: " + e.getMessage());
         } finally {
