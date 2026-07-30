@@ -34,9 +34,18 @@ public class CallbackHandler implements UpdateHandler{
         if(update.hasCallbackQuery()) {
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             String callbackData = update.getCallbackQuery().getData();
+
+            // ---- НОВАЯ ПРОВЕРКА ДЛЯ view_errors ----
+            if ("view_errors".equals(callbackData)) {
+                // TODO: реализовать показ ошибок
+                messageSender.sendMessage(bot, chatId, "Показываем ошибки... (в разработке)");
+                return true;
+            }
+            // ---------------------------------------
+
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {
-                messageSender.sendMessageWithKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
                 return true;
             }
 
@@ -47,6 +56,11 @@ public class CallbackHandler implements UpdateHandler{
                 bot.execute(answer);
             }  catch (Exception e) {
                 messageSender.sendMessage(bot, chatId, "Не удалось отправить ответ. Ошибка: " + e.getMessage());
+            }
+
+            // Проверяем, что это ответ на вопрос (начинается с "answer_")
+            if (!callbackData.startsWith("answer_")) {
+                return false;
             }
 
             int userAnswerIndex = Integer.parseInt(callbackData.substring(7));
@@ -70,15 +84,14 @@ public class CallbackHandler implements UpdateHandler{
 
                 } catch (Exception e) {
                     messageSender.sendMessage(bot, chatId, "Не удалось загрузить билет. Ошибка: " + e.getMessage());
-                    }
+                }
 
             } else {
                 //после последнего вопроса завершаем
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
                 ticketProcessingService.checkExam(bot, telegramId,userName,chatId);
-                sessionStorage.removeSession(chatId);
-
+                //sessionStorage.removeSession(chatId);
 
                 return true;
 

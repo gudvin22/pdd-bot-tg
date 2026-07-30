@@ -32,7 +32,7 @@ public class MessageSender {
         }
     }
 
-    public void sendMessageWithKeyboard(PddBot bot, Long chatId, String text, ReplyKeyboardMarkup keyboard) {
+    public void sendMessageWithReplyKeyboard(PddBot bot, Long chatId, String text, ReplyKeyboardMarkup keyboard) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(text);
@@ -42,6 +42,19 @@ public class MessageSender {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendMessageInlineKeyboard(PddBot bot, Long chatId, String text, InlineKeyboardMarkup keyboard) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        message.setReplyMarkup(keyboard);
+        try {
+            bot.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void sendFoto(PddBot bot, Long chatId, String imageUrl) throws IOException {

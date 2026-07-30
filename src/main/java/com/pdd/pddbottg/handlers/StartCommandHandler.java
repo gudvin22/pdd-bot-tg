@@ -35,7 +35,7 @@ public class StartCommandHandler implements UpdateHandler {
                 tokenStorageService.SaveToken(telegramId, token);
                 //String message = tokenStorageService.GetJwtToken(telegramId).orElseThrow(() -> new RuntimeException("Токен не найден"));;
                 //messageSender.sendMessage(bot, chatId, startMessage);
-                messageSender.sendMessageWithKeyboard(bot,chatId,startMessage,keyboardService.mainMenu());
+                messageSender.sendMessageWithReplyKeyboard(bot,chatId,startMessage,keyboardService.mainMenu());
 
 
                 return true;

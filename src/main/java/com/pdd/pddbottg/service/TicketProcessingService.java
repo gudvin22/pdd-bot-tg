@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class TicketProcessingService {
         String url = serverAddress + "/api/exam/check";
         ExamSession session = sessionStorage.getSession(chatId);
         if (session == null) {
-            messageSender.sendMessageWithKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
 
             return;
         }
@@ -63,17 +64,26 @@ public class TicketProcessingService {
                     response.getBody(),
                     mapper.getTypeFactory().constructCollectionType(List.class, WrongAnswerDto.class)
             );
+
+            session.setWrongAnswers(wrongAnswers); //создаем сессию неправильных ответов
+            session.setCurrentErrorIndex(0);
+
             if (wrongAnswers.isEmpty()) {
                 messageSender.sendMessage(bot, chatId, "Все правильно, поздравляю!");
+                sessionStorage.removeSession(chatId);
 
             }
-            messageSender.sendMessage(bot, chatId, "У тебя " + wrongAnswers.size() + " ошибок. Давай разберем их?");
-        } catch (Exception e) {
-            messageSender.sendMessage(bot, chatId, "Ошибка проверки: " + e.getMessage());
-        } finally {
-            sessionStorage.removeSession(chatId);
-        }
+            else {
 
+                messageSender.sendMessage(bot, chatId, "У тебя " + wrongAnswers.size() + " ошибок. ");
+
+                InlineKeyboardMarkup keyboardMarkup = keyboardService.viewErrorsKeyboard();
+                messageSender.sendMessageInlineKeyboard(bot, chatId, "Давай разберем их ?", keyboardMarkup);
+
+            }
+            } catch (Exception e) {
+            messageSender.sendMessage(bot, chatId, "Ошибка проверки: " + e.getMessage());
+        }
     }
 
     private ResponseEntity<String> executeWithAuth(String url, HttpMethod method, Object body, String telegramId, String userName) {

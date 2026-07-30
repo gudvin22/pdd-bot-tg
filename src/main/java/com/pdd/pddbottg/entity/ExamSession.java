@@ -1,6 +1,7 @@
 package com.pdd.pddbottg.entity;
 
 import com.pdd.pddbottg.dto.QuestionDto;
+import com.pdd.pddbottg.dto.WrongAnswerDto;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -12,6 +13,9 @@ public class ExamSession {
     private List<QuestionDto> questions;
     private List<Integer> userAnswers;
     private int currentQuestionIndex;
+
+    private List<WrongAnswerDto> wrongAnswers;
+    private int currentErrorIndex;
 
     public ExamSession(int ticketNumber, List<QuestionDto> questions) {
         this.ticketNumber = ticketNumber;
