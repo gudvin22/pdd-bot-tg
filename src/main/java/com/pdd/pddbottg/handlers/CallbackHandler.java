@@ -35,13 +35,7 @@ public class CallbackHandler implements UpdateHandler{
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             String callbackData = update.getCallbackQuery().getData();
 
-            // ---- НОВАЯ ПРОВЕРКА ДЛЯ view_errors ----
-            if ("view_errors".equals(callbackData)) {
-                // TODO: реализовать показ ошибок
-                messageSender.sendMessage(bot, chatId, "Показываем ошибки... (в разработке)");
-                return true;
-            }
-            // ---------------------------------------
+
 
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {

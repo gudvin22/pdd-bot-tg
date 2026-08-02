@@ -3,6 +3,7 @@ package com.pdd.pddbottg.service;
 import com.pdd.pddbottg.PddBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -49,6 +50,7 @@ public class MessageSender {
         message.setChatId(chatId.toString());
         message.setText(text);
         message.setReplyMarkup(keyboard);
+        message.setParseMode(ParseMode.HTML);
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
@@ -56,6 +58,7 @@ public class MessageSender {
         }
 
     }
+
 
     public void sendFoto(PddBot bot, Long chatId, String imageUrl) throws IOException {
 

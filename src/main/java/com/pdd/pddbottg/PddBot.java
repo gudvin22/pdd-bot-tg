@@ -1,9 +1,6 @@
 package com.pdd.pddbottg;
 
-import com.pdd.pddbottg.handlers.CallbackHandler;
-import com.pdd.pddbottg.handlers.RandomExamHandler;
-import com.pdd.pddbottg.handlers.StartCommandHandler;
-import com.pdd.pddbottg.handlers.UpdateHandler;
+import com.pdd.pddbottg.handlers.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,6 +16,7 @@ public class PddBot extends TelegramLongPollingBot {
     private final RandomExamHandler randomExamHandler;
     private final StartCommandHandler startCommandHandler;
     private final CallbackHandler callbackHandler;
+    private final ErrorViewHandler errorViewHandler;
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -41,6 +39,7 @@ public class PddBot extends TelegramLongPollingBot {
         startCommandHandler.handle(this, update);
         randomExamHandler.handle(this, update);
         callbackHandler.handle(this, update);
+        errorViewHandler.handle(this, update);
     }
 
 
