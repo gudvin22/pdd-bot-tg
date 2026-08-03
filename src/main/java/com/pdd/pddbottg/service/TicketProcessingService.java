@@ -2,6 +2,7 @@ package com.pdd.pddbottg.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdd.pddbottg.PddBot;
+import com.pdd.pddbottg.dto.AiAnalysisRequestDto;
 import com.pdd.pddbottg.dto.ExamCheckRequestDto;
 import com.pdd.pddbottg.dto.WrongAnswerDto;
 import com.pdd.pddbottg.entity.ExamSession;
@@ -86,6 +87,12 @@ public class TicketProcessingService {
         }
     }
 
+    public String getAiAnalysis(String telegramId, String userName, AiAnalysisRequestDto request) {
+        String url = serverAddress + "/api/ai/analyze-errors";
+        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.POST, request, telegramId, userName);
+        return response.getBody();
+    }
+
     private ResponseEntity<String> executeWithAuth(String url, HttpMethod method, Object body, String telegramId, String userName) {
         try {
             HttpHeaders headers = tokenStorageService.createAuthHeaders(telegramId);
@@ -103,6 +110,7 @@ public class TicketProcessingService {
             throw new RuntimeException("Ошибка при вызове API: " + e.getMessage(), e);
         }
     }
+
 
 
 

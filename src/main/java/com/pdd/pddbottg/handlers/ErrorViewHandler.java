@@ -2,10 +2,9 @@ package com.pdd.pddbottg.handlers;
 
 
 import com.pdd.pddbottg.PddBot;
+import com.pdd.pddbottg.dto.AiAnalysisRequestDto;
 import com.pdd.pddbottg.entity.ExamSession;
-import com.pdd.pddbottg.service.KeyboardService;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.SessionStorage;
+import com.pdd.pddbottg.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,6 +23,8 @@ public class ErrorViewHandler implements UpdateHandler{
     private final SessionStorage sessionStorage;
     private final MessageSender messageSender;
     private final KeyboardService keyboardService;
+    private final AiTicketAnalysisService aiTicketAnalysisService;
+    private final TicketProcessingService ticketProcessingService;
 
     @Value("${bot.message.responseRandomTicketErrorSession}")
     private String responseRandomTicketErrorSession;
@@ -65,8 +66,10 @@ public class ErrorViewHandler implements UpdateHandler{
                     break;
                 }
                 case "get_ai_analysis": {
-                    messageSender.sendMessage(bot, chatId,"AI анализ в разработке");
-                    sessionStorage.removeSession(chatId);
+                    String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
+                    String userName = update.getCallbackQuery().getFrom().getFirstName();
+                    //messageSender.sendMessage(bot, chatId,"AI анализ в разработке");
+                    getAiAnalysis(bot, chatId, session, telegramId, userName);
                     break;
                 }
 
@@ -148,12 +151,29 @@ public class ErrorViewHandler implements UpdateHandler{
                 // игнорируем
             }
         }
-
-
-
         messageSender.sendMessageInlineKeyboard(bot, chatId, text.toString(), keyboard);
 
-
-
     }
+
+    private void getAiAnalysis(PddBot bot, Long chatId, ExamSession session,  String telegramId, String userName){
+        if(session.getWrongAnswers() == null || session.getWrongAnswers().isEmpty()) {
+            messageSender.sendMessage(bot, chatId, "Нет ошибок для анализа.");
+            return;
+        }
+
+        AiAnalysisRequestDto requestDto = aiTicketAnalysisService.buildRequestDto(session);
+        messageSender.sendMessage(bot, chatId, "🧠 Генерирую AI-анализ...");
+
+        try {
+            // Отправляем запрос на сервер
+            String analysis = ticketProcessingService.getAiAnalysis(telegramId, userName, requestDto);
+            messageSender.sendMessage(bot, chatId, analysis);
+        } catch (Exception e) {
+            messageSender.sendMessage(bot, chatId, "❌ Ошибка: " + e.getMessage());
+        } finally {
+            // Сессию удаляем здесь, чтобы не дублировать в кейсе
+            sessionStorage.removeSession(chatId);
+        }
+    }
+
 }
