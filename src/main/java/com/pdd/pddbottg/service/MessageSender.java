@@ -34,6 +34,7 @@ public class MessageSender {
     }
 
     public void sendMessageWithReplyKeyboard(PddBot bot, Long chatId, String text, ReplyKeyboardMarkup keyboard) {
+
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(text);

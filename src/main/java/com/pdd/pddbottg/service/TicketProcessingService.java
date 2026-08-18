@@ -2,7 +2,7 @@ package com.pdd.pddbottg.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdd.pddbottg.PddBot;
-import com.pdd.pddbottg.dto.AiAnalysisRequestDto;
+import com.pdd.pddbottg.dto.AiAnalysisTicketRequestDto;
 import com.pdd.pddbottg.dto.ExamCheckRequestDto;
 import com.pdd.pddbottg.dto.WrongAnswerDto;
 import com.pdd.pddbottg.entity.ExamSession;
@@ -48,7 +48,7 @@ public class TicketProcessingService {
         String url = serverAddress + "/api/exam/check";
         ExamSession session = sessionStorage.getSession(chatId);
         if (session == null) {
-            messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainRandomMenu());
 
             return;
         }
@@ -82,12 +82,15 @@ public class TicketProcessingService {
                 messageSender.sendMessageInlineKeyboard(bot, chatId, "Давай разберем их ?", keyboardMarkup);
 
             }
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, "Или перейдем в главное меню", keyboardService.mainMenu());
+
+
             } catch (Exception e) {
             messageSender.sendMessage(bot, chatId, "Ошибка проверки: " + e.getMessage());
         }
     }
 
-    public String getAiAnalysis(String telegramId, String userName, AiAnalysisRequestDto request) {
+    public String getAiAnalysis(String telegramId, String userName, AiAnalysisTicketRequestDto request) {
         String url = serverAddress + "/api/ai/analyze-errors";
         ResponseEntity<String> response = executeWithAuth(url, HttpMethod.POST, request, telegramId, userName);
         return response.getBody();

@@ -2,7 +2,7 @@ package com.pdd.pddbottg.handlers;
 
 
 import com.pdd.pddbottg.PddBot;
-import com.pdd.pddbottg.dto.AiAnalysisRequestDto;
+import com.pdd.pddbottg.dto.AiAnalysisTicketRequestDto;
 import com.pdd.pddbottg.entity.ExamSession;
 import com.pdd.pddbottg.service.*;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class ErrorViewHandler implements UpdateHandler{
 
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {
-                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainRandomMenu());
                 return true;
             }
 
@@ -161,7 +161,7 @@ public class ErrorViewHandler implements UpdateHandler{
             return;
         }
 
-        AiAnalysisRequestDto requestDto = aiTicketAnalysisService.buildRequestDto(session);
+        AiAnalysisTicketRequestDto requestDto = aiTicketAnalysisService.buildRequestDto(session);
         messageSender.sendMessage(bot, chatId, "🧠 Генерирую AI-анализ...");
 
         try {

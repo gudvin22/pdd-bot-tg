@@ -39,7 +39,7 @@ public class CallbackHandler implements UpdateHandler{
 
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {
-                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainRandomMenu());
                 return true;
             }
 

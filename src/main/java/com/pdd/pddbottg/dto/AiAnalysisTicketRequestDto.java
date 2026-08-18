@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AiAnalysisRequestDto {
+public class AiAnalysisTicketRequestDto {
     private int ticketNumber;
     private List<ErrorDetail> errors;
 
