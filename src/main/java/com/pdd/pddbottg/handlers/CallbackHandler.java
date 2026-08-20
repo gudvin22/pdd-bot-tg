@@ -1,12 +1,10 @@
 package com.pdd.pddbottg.handlers;
 
 import com.pdd.pddbottg.PddBot;
+import com.pdd.pddbottg.dto.ExamResponseDto;
 import com.pdd.pddbottg.dto.QuestionDto;
 import com.pdd.pddbottg.entity.ExamSession;
-import com.pdd.pddbottg.service.KeyboardService;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.SessionStorage;
-import com.pdd.pddbottg.service.TicketProcessingService;
+import com.pdd.pddbottg.service.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +19,7 @@ public class CallbackHandler implements UpdateHandler{
     private final MessageSender messageSender;
     private final TicketProcessingService ticketProcessingService;
     private final KeyboardService keyboardService;
+    private final TokenStorageService tokenStorageService;
 
     @Value("${bot.message.responseRandomQuestion}")
     private String responseMessage;
@@ -37,9 +36,34 @@ public class CallbackHandler implements UpdateHandler{
 
 
 
+            // Обработка выбора билета из списка
+            if (callbackData.startsWith("ticket_")) {
+                int ticketNumber = Integer.parseInt(callbackData.substring(7));
+                String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
+                String userName = update.getCallbackQuery().getFrom().getFirstName();
+
+                try {
+                    ExamResponseDto ticketResponse = ticketProcessingService.getTicket(ticketNumber, telegramId, userName);
+                    ExamSession ticketSession = new ExamSession(ticketResponse.getTicketNumber(), ticketResponse.getQuestions());
+                    sessionStorage.putSession(chatId, ticketSession);
+
+                    messageSender.sendMessage(bot, chatId, "Билет № " + ticketResponse.getTicketNumber() + "\nВопрос № 1");
+                    QuestionDto question = ticketResponse.getQuestions().get(0);
+                    String imageUrl = question.getImageUrlSmall();
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        messageSender.sendFoto(bot, chatId, imageUrl);
+                    }
+                    messageSender.sendQuestionTextWithInline(bot, chatId, question.getQuestionText(), question.getAnswersText());
+
+                } catch (Exception e) {
+                    messageSender.sendMessage(bot, chatId, "❌ Не удалось загрузить билет: " + e.getMessage());
+                }
+                return true;
+            }
+
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {
-                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainRandomMenu());
+                messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
                 return true;
             }
 

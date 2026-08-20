@@ -1,10 +1,9 @@
 package com.pdd.pddbottg.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdd.pddbottg.PddBot;
-import com.pdd.pddbottg.dto.AiAnalysisTicketRequestDto;
-import com.pdd.pddbottg.dto.ExamCheckRequestDto;
-import com.pdd.pddbottg.dto.WrongAnswerDto;
+import com.pdd.pddbottg.dto.*;
 import com.pdd.pddbottg.entity.ExamSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,11 +43,22 @@ public class TicketProcessingService {
         return response.getBody();
     }
 
+    public ExamResponseDto getTicket(int ticketNumber, String telegramId, String userName) {
+        String url = serverAddress + "/api/exam/ticket/" + ticketNumber;
+        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(response.getBody(), ExamResponseDto.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка получения билета " + ticketNumber, e);
+        }
+    }
+
     public void checkExam(PddBot bot, String telegramId, String userName, Long chatId) {
         String url = serverAddress + "/api/exam/check";
         ExamSession session = sessionStorage.getSession(chatId);
         if (session == null) {
-            messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainRandomMenu());
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
 
             return;
         }
@@ -96,6 +106,18 @@ public class TicketProcessingService {
         return response.getBody();
     }
 
+    public List<TicketStatusDto> getTicketsStatus(String telegramId, String userName) {
+        String url = serverAddress + "/api/statistics/tickets-status";
+        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(response.getBody(), new  TypeReference<>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка парсинга статусов билетов", e);
+        }
+    }
+
+
     private ResponseEntity<String> executeWithAuth(String url, HttpMethod method, Object body, String telegramId, String userName) {
         try {
             HttpHeaders headers = tokenStorageService.createAuthHeaders(telegramId);
@@ -113,6 +135,8 @@ public class TicketProcessingService {
             throw new RuntimeException("Ошибка при вызове API: " + e.getMessage(), e);
         }
     }
+
+
 
 
 
