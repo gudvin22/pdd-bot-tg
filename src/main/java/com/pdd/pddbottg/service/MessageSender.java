@@ -3,6 +3,7 @@ package com.pdd.pddbottg.service;
 import com.pdd.pddbottg.PddBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -11,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -135,6 +137,17 @@ public class MessageSender {
             e.printStackTrace();
         }
     }
+    public void sendTypingAction(PddBot bot, Long chatId) {
+        SendChatAction action = new SendChatAction();
+        action.setChatId(chatId.toString());
+        action.setAction(ActionType.TYPING);
+        try {
+            bot.execute(action);
+        } catch (TelegramApiException e) {
+            // логируем, но не прерываем выполнение
+        }
+    }
+
 
 
 

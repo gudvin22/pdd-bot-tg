@@ -20,6 +20,7 @@ public class CallbackHandler implements UpdateHandler{
     private final TicketProcessingService ticketProcessingService;
     private final KeyboardService keyboardService;
     private final TokenStorageService tokenStorageService;
+    private final StatisticsService statisticsService;
 
     @Value("${bot.message.responseRandomQuestion}")
     private String responseMessage;
@@ -60,6 +61,26 @@ public class CallbackHandler implements UpdateHandler{
                 }
                 return true;
             }
+            if (callbackData.equals("ai_statistics_analysis")) {
+                String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
+                String userName = update.getCallbackQuery().getFrom().getFirstName();
+
+                messageSender.sendMessage(bot, chatId, "🧠 Генерирую AI-анализ...");
+                messageSender.sendTypingAction(bot, chatId);
+
+                try {
+                    String analysis = statisticsService.getRecommendation(telegramId, userName);
+                    messageSender.sendMessage(bot, chatId, analysis);
+                } catch (Exception e) {
+                    messageSender.sendMessage(bot, chatId, "❌ Ошибка: " + e.getMessage());
+                }
+                return true;
+            }
+
+
+
+
+
 
             ExamSession session = sessionStorage.getSession(chatId);
             if(session == null) {
@@ -114,6 +135,7 @@ public class CallbackHandler implements UpdateHandler{
                 return true;
 
             }
+
 
         }
         return false;

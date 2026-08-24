@@ -35,17 +35,18 @@ public class TicketProcessingService {
     private final MessageSender messageSender;
     private final SessionStorage sessionStorage;
     private final KeyboardService keyboardService;
+    private final HttpClientService httpClientService;
 
 
     public String randomExam(String telegramId, String userName) {
         String url = serverAddress + "/api/exam/random";
-        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
         return response.getBody();
     }
 
     public ExamResponseDto getTicket(int ticketNumber, String telegramId, String userName) {
         String url = serverAddress + "/api/exam/ticket/" + ticketNumber;
-        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(response.getBody(), ExamResponseDto.class);
@@ -69,7 +70,7 @@ public class TicketProcessingService {
 
 
         try {
-            ResponseEntity<String> response = executeWithAuth(url, HttpMethod.POST, requestDto, telegramId, userName);
+            ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.POST, requestDto, telegramId, userName);
             ObjectMapper mapper = new ObjectMapper();
             List<WrongAnswerDto> wrongAnswers = mapper.readValue(
                     response.getBody(),
@@ -102,13 +103,13 @@ public class TicketProcessingService {
 
     public String getAiAnalysis(String telegramId, String userName, AiAnalysisTicketRequestDto request) {
         String url = serverAddress + "/api/ai/analyze-errors";
-        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.POST, request, telegramId, userName);
+        ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.POST, request, telegramId, userName);
         return response.getBody();
     }
 
     public List<TicketStatusDto> getTicketsStatus(String telegramId, String userName) {
         String url = serverAddress + "/api/statistics/tickets-status";
-        ResponseEntity<String> response = executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(response.getBody(), new  TypeReference<>() {});
@@ -116,28 +117,6 @@ public class TicketProcessingService {
             throw new RuntimeException("Ошибка парсинга статусов билетов", e);
         }
     }
-
-
-    private ResponseEntity<String> executeWithAuth(String url, HttpMethod method, Object body, String telegramId, String userName) {
-        try {
-            HttpHeaders headers = tokenStorageService.createAuthHeaders(telegramId);
-            HttpEntity<?> entity = (body == null) ? new HttpEntity<>(headers) : new HttpEntity<>(body, headers);
-            return restTemplate.exchange(url, method, entity, String.class);
-        } catch (HttpClientErrorException.Forbidden e) {
-            // Обновляем токен
-            String newToken = authService.registerUser(telegramId, userName);
-            tokenStorageService.SaveToken(telegramId, newToken);
-            // Повторяем запрос с новым токеном
-            HttpHeaders newHeaders = tokenStorageService.createAuthHeaders(telegramId);
-            HttpEntity<?> retryEntity = (body == null) ? new HttpEntity<>(newHeaders) : new HttpEntity<>(body, newHeaders);
-            return restTemplate.exchange(url, method, retryEntity, String.class);
-        } catch (RestClientException e) {
-            throw new RuntimeException("Ошибка при вызове API: " + e.getMessage(), e);
-        }
-    }
-
-
-
 
 
 
