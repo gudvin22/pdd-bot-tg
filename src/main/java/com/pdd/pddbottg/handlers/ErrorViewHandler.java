@@ -162,8 +162,9 @@ public class ErrorViewHandler implements UpdateHandler{
         }
 
         AiAnalysisTicketRequestDto requestDto = aiTicketAnalysisService.buildRequestDto(session);
+
         messageSender.sendMessage(bot, chatId, "🧠 Генерирую AI-анализ...");
-        messageSender.sendTypingAction(bot, chatId);
+
 
         try {
             // Отправляем запрос на сервер

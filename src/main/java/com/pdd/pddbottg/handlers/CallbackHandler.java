@@ -65,8 +65,9 @@ public class CallbackHandler implements UpdateHandler{
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
 
+
                 messageSender.sendMessage(bot, chatId, "🧠 Генерирую AI-анализ...");
-                messageSender.sendTypingAction(bot, chatId);
+
 
                 try {
                     String analysis = statisticsService.getRecommendation(telegramId, userName);

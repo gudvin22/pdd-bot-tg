@@ -137,16 +137,7 @@ public class MessageSender {
             e.printStackTrace();
         }
     }
-    public void sendTypingAction(PddBot bot, Long chatId) {
-        SendChatAction action = new SendChatAction();
-        action.setChatId(chatId.toString());
-        action.setAction(ActionType.TYPING);
-        try {
-            bot.execute(action);
-        } catch (TelegramApiException e) {
-            // логируем, но не прерываем выполнение
-        }
-    }
+
 
 
 
