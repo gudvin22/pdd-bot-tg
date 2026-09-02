@@ -25,6 +25,8 @@ public class PddBot extends TelegramLongPollingBot {
     private final HelpCommandHandler helpCommandHandler;
     private final TicketListHandler ticketListHandler;
     private final StatisticsHandler statisticsHandler;
+    private final RefreshCommandHandler refreshCommandHandler;
+    private final RecommendationHandler recommendationHandler;
 
 
     @Value("${telegram.bot.token}")
@@ -36,6 +38,7 @@ public class PddBot extends TelegramLongPollingBot {
     public void setCommands() {
         List<BotCommand> commands = List.of(
                 new BotCommand("start", "🏠 Перезапуск"),
+                new BotCommand("refresh", "🔄 Перезапустить бота"),
                 new BotCommand("help", "❓ Помощь")
         );
         try {
@@ -62,12 +65,14 @@ public class PddBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         startCommandHandler.handle(this, update);
+        refreshCommandHandler.handle(this, update);
         helpCommandHandler.handle(this, update);
         randomExamHandler.handle(this, update);
         callbackHandler.handle(this, update);
         errorViewHandler.handle(this, update);
         ticketListHandler.handle(this, update);
         statisticsHandler.handle(this, update);
+        recommendationHandler.handle(this, update);
     }
 
 

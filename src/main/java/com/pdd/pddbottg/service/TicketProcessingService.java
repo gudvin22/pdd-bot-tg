@@ -118,6 +118,17 @@ public class TicketProcessingService {
         }
     }
 
+    public List<RecommendationQuestionDto> getRecommendedQuestions(String telegramId, String userName) {
+        String url = serverAddress + "/api/exam/recommended-questions";
+        ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(response.getBody(), new  TypeReference<>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка получения рекомендованных вопросов", e);
+        }
+    }
+
 
 
 
