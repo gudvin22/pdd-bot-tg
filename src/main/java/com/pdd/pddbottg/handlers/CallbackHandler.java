@@ -1,5 +1,6 @@
 package com.pdd.pddbottg.handlers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.ExamResponseDto;
 import com.pdd.pddbottg.dto.QuestionDto;
@@ -20,7 +21,7 @@ public class CallbackHandler implements UpdateHandler {
     private final KeyboardService keyboardService;
     private final TokenStorageService tokenStorageService;
     private final StatisticsService statisticsService;
-    private final TrainingService trainingService; // ★ добавить
+    private final TrainingService trainingService;
 
     @Value("${bot.message.responseRandomQuestion}")
     private String responseMessage;
@@ -93,7 +94,7 @@ public class CallbackHandler implements UpdateHandler {
                 return true;
             }
 
-            // Обычный экзамен
+            // Проверка сессии
             ExamSession session = sessionStorage.getSession(chatId);
             if (session == null) {
                 messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
@@ -112,6 +113,19 @@ public class CallbackHandler implements UpdateHandler {
             // Проверяем, что это ответ на вопрос (начинается с "answer_")
             if (!callbackData.startsWith("answer_")) {
                 return false;
+            }
+
+            // ★★★★★ ПРОВЕРКА ВРЕМЕНИ ДЛЯ ЭКЗАМЕНА ★★★★★
+            if (session.getTicketNumber() == -1) {
+                long elapsed = System.currentTimeMillis() - session.getStartTime();
+                if (elapsed > 20 * 60 * 1000) {
+                    messageSender.sendMessage(bot, chatId, "⏰ Время вышло! Экзамен завершён.");
+                    // Завершаем экзамен через специальный метод
+                    String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
+                    String userName = update.getCallbackQuery().getFrom().getFirstName();
+                    ticketProcessingService.checkGibddExam(bot, telegramId, userName, chatId);
+                    return true;
+                }
             }
 
             int userAnswerIndex = Integer.parseInt(callbackData.substring(7));
@@ -135,7 +149,13 @@ public class CallbackHandler implements UpdateHandler {
             } else {
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
-                ticketProcessingService.checkExam(bot, telegramId, userName, chatId);
+
+                // ★★★ ВЫБИРАЕМ МЕТОД ПРОВЕРКИ В ЗАВИСИМОСТИ ОТ РЕЖИМА ★★★
+                if (session.getTicketNumber() == -1) {
+                    ticketProcessingService.checkGibddExam(bot, telegramId, userName, chatId);
+                } else {
+                    ticketProcessingService.checkExam(bot, telegramId, userName, chatId);
+                }
                 return true;
             }
         }

@@ -13,7 +13,7 @@ public class ExamSession {
     private List<QuestionDto> questions;
     private List<Integer> userAnswers;
     private int currentQuestionIndex;
-
+    private long startTime;
     private List<WrongAnswerDto> wrongAnswers;
     private int currentErrorIndex;
 
@@ -25,6 +25,7 @@ public class ExamSession {
         for (int i = 0; i < questions.size(); i++) {
             this.userAnswers.add(-1);
         }
+        this.startTime = System.currentTimeMillis();
     }
 
 

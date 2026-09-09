@@ -44,6 +44,7 @@ public class TicketProcessingService {
         return response.getBody();
     }
 
+
     public ExamResponseDto getTicket(int ticketNumber, String telegramId, String userName) {
         String url = serverAddress + "/api/exam/ticket/" + ticketNumber;
         ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.GET, null, telegramId, userName);
@@ -126,6 +127,29 @@ public class TicketProcessingService {
             return mapper.readValue(response.getBody(), new  TypeReference<>() {});
         } catch (Exception e) {
             throw new RuntimeException("Ошибка получения рекомендованных вопросов", e);
+        }
+    }
+
+    public void checkGibddExam(PddBot bot, String telegramId, String userName, Long chatId) {
+        String url = serverAddress + "/api/exam/check-exam";
+        ExamSession session = sessionStorage.getSession(chatId);
+        if (session == null) {
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
+            return;
+        }
+
+        ExamCheckRequestDto requestDto = new ExamCheckRequestDto();
+        requestDto.setTicketNumber(session.getTicketNumber()); // -1 для экзамена
+        requestDto.setAnswers(session.getUserAnswers());
+
+        try {
+            ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.POST, requestDto, telegramId, userName);
+            ObjectMapper mapper = new ObjectMapper();
+            // Здесь нужно будет парсить ответ (пока оставим заглушку)
+            messageSender.sendMessage(bot, chatId, "📝 Экзамен проверен! Результат пришёл.");
+            // sessionStorage.removeSession(chatId);
+        } catch (Exception e) {
+            messageSender.sendMessage(bot, chatId, "Ошибка проверки экзамена: " + e.getMessage());
         }
     }
 
