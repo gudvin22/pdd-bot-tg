@@ -16,6 +16,10 @@ public class ExamSession {
     private long startTime;
     private List<WrongAnswerDto> wrongAnswers;
     private int currentErrorIndex;
+    private List<QuestionDto> additionalQuestions;
+    private List<Integer> additionalAnswers;
+    private int currentAdditionalIndex;
+
 
     public ExamSession(int ticketNumber, List<QuestionDto> questions) {
         this.ticketNumber = ticketNumber;

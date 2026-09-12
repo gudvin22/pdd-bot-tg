@@ -36,6 +36,7 @@ public class TicketProcessingService {
     private final SessionStorage sessionStorage;
     private final KeyboardService keyboardService;
     private final HttpClientService httpClientService;
+    private final AdditionalQuestionsService additionalQuestionsService;
 
 
     public String randomExam(String telegramId, String userName) {
@@ -145,9 +146,30 @@ public class TicketProcessingService {
         try {
             ResponseEntity<String> response = httpClientService.executeWithAuth(url, HttpMethod.POST, requestDto, telegramId, userName);
             ObjectMapper mapper = new ObjectMapper();
-            // Здесь нужно будет парсить ответ (пока оставим заглушку)
-            messageSender.sendMessage(bot, chatId, "📝 Экзамен проверен! Результат пришёл.");
-            // sessionStorage.removeSession(chatId);
+            ExamResultDto result = mapper.readValue(response.getBody(), ExamResultDto.class);
+
+            //сообщение о результате
+            messageSender.sendMessage(bot, chatId, result.getMessage());
+
+            //Если экзамен сдан  завершаем
+            if (result.isPassed()) {
+                messageSender.sendMessageWithReplyKeyboard(bot, chatId, "🎉 Поздравляю с успешной сдачей!", keyboardService.mainMenu());
+                sessionStorage.removeSession(chatId);
+                return;
+            }
+
+            //Если есть дополнительные вопросы — начинаем дополнительную сессию
+            if (result.getAdditionalQuestions() != null && !result.getAdditionalQuestions().isEmpty()) {
+
+                messageSender.sendMessage(bot, chatId, "📝 Дополнительных вопросов: " + result.getAdditionalQuestions().size());
+                additionalQuestionsService.start(bot, chatId, result.getAdditionalQuestions());
+                return;
+            }
+
+            // Иначе — экзамен не сдан, показываем ошибки
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, "❌ Экзамен не сдан.", keyboardService.mainMenu());
+            sessionStorage.removeSession(chatId);
+
         } catch (Exception e) {
             messageSender.sendMessage(bot, chatId, "Ошибка проверки экзамена: " + e.getMessage());
         }

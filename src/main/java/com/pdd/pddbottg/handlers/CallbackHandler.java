@@ -22,6 +22,7 @@ public class CallbackHandler implements UpdateHandler {
     private final TokenStorageService tokenStorageService;
     private final StatisticsService statisticsService;
     private final TrainingService trainingService;
+    private final AdditionalQuestionsService additionalQuestionsService; // ★ добавить
 
     @Value("${bot.message.responseRandomQuestion}")
     private String responseMessage;
@@ -36,7 +37,7 @@ public class CallbackHandler implements UpdateHandler {
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             String callbackData = update.getCallbackQuery().getData();
 
-            // РЕЖИМ ТРЕНИРОВКИ
+            // 1. РЕЖИМ ТРЕНИРОВКИ
             if (sessionStorage.isTrainingMode(chatId)) {
                 if (callbackData.startsWith("answer_")) {
                     int userAnswerIndex = Integer.parseInt(callbackData.substring(7));
@@ -53,7 +54,20 @@ public class CallbackHandler implements UpdateHandler {
                 }
             }
 
-            // Обработка выбора билета из списка
+            // ★ 2. РЕЖИМ ДОПОЛНИТЕЛЬНЫХ ВОПРОСОВ (ЭКЗАМЕН) ★
+            ExamSession sessionCheck = sessionStorage.getSession(chatId);
+            if (sessionCheck != null
+                    && sessionCheck.getAdditionalQuestions() != null
+                    && !sessionCheck.getAdditionalQuestions().isEmpty()) {
+                if (callbackData.startsWith("answer_")) {
+                    int userAnswerIndex = Integer.parseInt(callbackData.substring(7));
+                    additionalQuestionsService.handleAnswer(bot, chatId, userAnswerIndex);
+                    return true;
+                }
+                return true; // блокируем другие callback'и в этом режиме
+            }
+
+            // 3. Обработка выбора билета из списка
             if (callbackData.startsWith("ticket_")) {
                 int ticketNumber = Integer.parseInt(callbackData.substring(7));
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
@@ -78,7 +92,7 @@ public class CallbackHandler implements UpdateHandler {
                 return true;
             }
 
-            // AI-анализ статистики
+            // 4. AI-анализ статистики
             if (callbackData.equals("ai_statistics_analysis")) {
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
@@ -94,7 +108,7 @@ public class CallbackHandler implements UpdateHandler {
                 return true;
             }
 
-            // Проверка сессии
+            // 5. Проверка сессии
             ExamSession session = sessionStorage.getSession(chatId);
             if (session == null) {
                 messageSender.sendMessageWithReplyKeyboard(bot, chatId, responseRandomTicketErrorSession, keyboardService.mainMenu());
@@ -115,12 +129,11 @@ public class CallbackHandler implements UpdateHandler {
                 return false;
             }
 
-            // ★★★★★ ПРОВЕРКА ВРЕМЕНИ ДЛЯ ЭКЗАМЕНА ★★★★★
+            // ★ 6. ПРОВЕРКА ВРЕМЕНИ ДЛЯ ЭКЗАМЕНА ★
             if (session.getTicketNumber() == -1) {
                 long elapsed = System.currentTimeMillis() - session.getStartTime();
                 if (elapsed > 20 * 60 * 1000) {
                     messageSender.sendMessage(bot, chatId, "⏰ Время вышло! Экзамен завершён.");
-                    // Завершаем экзамен через специальный метод
                     String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                     String userName = update.getCallbackQuery().getFrom().getFirstName();
                     ticketProcessingService.checkGibddExam(bot, telegramId, userName, chatId);
@@ -128,6 +141,7 @@ public class CallbackHandler implements UpdateHandler {
                 }
             }
 
+            // 7. Обработка ответа на обычный вопрос
             int userAnswerIndex = Integer.parseInt(callbackData.substring(7));
             session.getUserAnswers().set(session.getCurrentQuestionIndex(), userAnswerIndex);
             session.setCurrentQuestionIndex(session.getCurrentQuestionIndex() + 1);
@@ -147,10 +161,10 @@ public class CallbackHandler implements UpdateHandler {
                     messageSender.sendMessage(bot, chatId, "Не удалось загрузить билет. Ошибка: " + e.getMessage());
                 }
             } else {
+                // Завершили основной билет — выбираем метод проверки
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
 
-                // ★★★ ВЫБИРАЕМ МЕТОД ПРОВЕРКИ В ЗАВИСИМОСТИ ОТ РЕЖИМА ★★★
                 if (session.getTicketNumber() == -1) {
                     ticketProcessingService.checkGibddExam(bot, telegramId, userName, chatId);
                 } else {
