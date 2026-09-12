@@ -36,7 +36,11 @@ public class GibddExamHandler implements UpdateHandler {
                     ExamResponseDto ticketResponse = objectMapper.readValue(json, ExamResponseDto.class);
 
                     // Сохраняем сессию с временем начала
-                    ExamSession sessionMap = new ExamSession(-1, ticketResponse.getQuestions());
+                    ExamSession sessionMap = new ExamSession(
+                            ticketResponse.getTicketNumber(),
+                            ticketResponse.getQuestions(),
+                            true
+                    );
                     sessionStorage.putSession(chatId, sessionMap);
 
                     messageSender.sendMessage(bot, chatId, "📝 Экзамен начался!\n⏱️ У тебя 20 минут.\nБилет № " + ticketResponse.getTicketNumber() + "\nВопрос № 1");

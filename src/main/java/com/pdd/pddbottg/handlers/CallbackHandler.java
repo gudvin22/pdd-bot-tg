@@ -130,7 +130,7 @@ public class CallbackHandler implements UpdateHandler {
             }
 
             // ★ 6. ПРОВЕРКА ВРЕМЕНИ ДЛЯ ЭКЗАМЕНА ★
-            if (session.getTicketNumber() == -1) {
+            if (session.isGibddExam()) {
                 long elapsed = System.currentTimeMillis() - session.getStartTime();
                 if (elapsed > 20 * 60 * 1000) {
                     messageSender.sendMessage(bot, chatId, "⏰ Время вышло! Экзамен завершён.");
@@ -165,7 +165,7 @@ public class CallbackHandler implements UpdateHandler {
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
 
-                if (session.getTicketNumber() == -1) {
+                if (session.isGibddExam()) {
                     ticketProcessingService.checkGibddExam(bot, telegramId, userName, chatId);
                 } else {
                     ticketProcessingService.checkExam(bot, telegramId, userName, chatId);

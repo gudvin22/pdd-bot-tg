@@ -140,7 +140,7 @@ public class TicketProcessingService {
         }
 
         ExamCheckRequestDto requestDto = new ExamCheckRequestDto();
-        requestDto.setTicketNumber(session.getTicketNumber()); // -1 для экзамена
+        requestDto.setTicketNumber(session.getTicketNumber());
         requestDto.setAnswers(session.getUserAnswers());
 
         try {
@@ -167,9 +167,13 @@ public class TicketProcessingService {
             }
 
             // Иначе — экзамен не сдан, показываем ошибки
-            messageSender.sendMessageWithReplyKeyboard(bot, chatId, "❌ Экзамен не сдан.", keyboardService.mainMenu());
+            messageSender.sendMessageWithReplyKeyboard(
+                    bot,
+                    chatId,
+                    "Выберите действие:",
+                    keyboardService.mainMenu()
+            );
             sessionStorage.removeSession(chatId);
-
         } catch (Exception e) {
             messageSender.sendMessage(bot, chatId, "Ошибка проверки экзамена: " + e.getMessage());
         }

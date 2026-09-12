@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class ExamSession {
     private int ticketNumber;
+    private boolean gibddExam;
     private List<QuestionDto> questions;
     private List<Integer> userAnswers;
     private int currentQuestionIndex;
@@ -20,17 +21,24 @@ public class ExamSession {
     private List<Integer> additionalAnswers;
     private int currentAdditionalIndex;
 
-
     public ExamSession(int ticketNumber, List<QuestionDto> questions) {
+        this(ticketNumber, questions, false);
+    }
+
+    public ExamSession(int ticketNumber, List<QuestionDto> questions, boolean gibddExam) {
         this.ticketNumber = ticketNumber;
         this.questions = questions;
+        this.gibddExam = gibddExam;
         this.currentQuestionIndex = 0;
         this.userAnswers = new ArrayList<>(questions.size());
+
         for (int i = 0; i < questions.size(); i++) {
             this.userAnswers.add(-1);
         }
+
         this.startTime = System.currentTimeMillis();
     }
-
-
 }
+
+
+
