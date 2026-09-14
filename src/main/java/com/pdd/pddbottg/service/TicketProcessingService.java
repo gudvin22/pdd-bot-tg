@@ -167,13 +167,15 @@ public class TicketProcessingService {
             }
 
             // Иначе — экзамен не сдан, показываем ошибки
-            messageSender.sendMessageWithReplyKeyboard(
-                    bot,
-                    chatId,
-                    "Выберите действие:",
-                    keyboardService.mainMenu()
-            );
-            sessionStorage.removeSession(chatId);
+            session.setWrongAnswers(result.getWrongAnswers());
+            session.setCurrentErrorIndex(0);
+
+            messageSender.sendMessage(bot, chatId, "Можно разобрать ошибки:");
+
+            InlineKeyboardMarkup keyboardMarkup = keyboardService.viewErrorsKeyboard();
+            messageSender.sendMessageInlineKeyboard(bot, chatId, "Посмотреть ошибки?", keyboardMarkup);
+
+            messageSender.sendMessageWithReplyKeyboard(bot, chatId, "Или перейдем в главное меню", keyboardService.mainMenu());
         } catch (Exception e) {
             messageSender.sendMessage(bot, chatId, "Ошибка проверки экзамена: " + e.getMessage());
         }
