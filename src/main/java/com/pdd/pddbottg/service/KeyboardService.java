@@ -36,7 +36,7 @@ public class KeyboardService {
 
         KeyboardRow row4 = new KeyboardRow();
 
-        row4.add("💬 Помощь и обратная связь");
+        row4.add("💬 Обратная связь");
 
         rows.add(row1);
         rows.add(row2);

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -133,6 +135,76 @@ public class MessageSender {
         message.setReplyMarkup(keyboard);
         try {
             bot.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public Integer sendMessageInlineKeyboardAndReturnId(PddBot bot, Long chatId, String text, InlineKeyboardMarkup keyboard) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        message.setReplyMarkup(keyboard);
+        message.setParseMode(ParseMode.HTML);
+        try {
+            var sent = bot.execute(message);
+            return sent.getMessageId();
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void editMessage(PddBot bot, Long chatId, Integer messageId, String newText) {
+        EditMessageText edit = new EditMessageText();
+        edit.setChatId(chatId.toString());
+        edit.setMessageId(messageId);
+        edit.setText(newText);
+        edit.setParseMode(ParseMode.HTML);
+        try {
+            bot.execute(edit);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendPhoto(PddBot bot, Long chatId, String fileId, String caption) {
+        sendPhotoAndReturnId(bot, chatId, fileId, caption, null);
+    }
+
+    /**
+     * Отправить фото по fileId с подписью и клавиатурой. Возвращает messageId.
+     */
+    public Integer sendPhotoAndReturnId(PddBot bot, Long chatId, String fileId,
+                                        String caption, InlineKeyboardMarkup keyboard) {
+        SendPhoto photo = new SendPhoto();
+        photo.setChatId(chatId.toString());
+        photo.setPhoto(new InputFile(fileId));
+        if (caption != null && !caption.isEmpty()) {
+            photo.setCaption(caption);
+            photo.setParseMode(ParseMode.HTML);
+        }
+        if (keyboard != null) {
+            photo.setReplyMarkup(keyboard);
+        }
+        try {
+            var sent = bot.execute(photo);
+            return sent.getMessageId();
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void editCaption(PddBot bot, Long chatId, Integer messageId, String newCaption) {
+        EditMessageCaption edit = new EditMessageCaption();
+        edit.setChatId(chatId.toString());
+        edit.setMessageId(messageId);
+        edit.setCaption(newCaption);
+        edit.setParseMode(ParseMode.HTML);
+        try {
+            bot.execute(edit);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

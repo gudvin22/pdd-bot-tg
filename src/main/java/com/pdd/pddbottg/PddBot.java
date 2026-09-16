@@ -28,6 +28,7 @@ public class PddBot extends TelegramLongPollingBot {
     private final RefreshCommandHandler refreshCommandHandler;
     private final RecommendationHandler recommendationHandler;
     private final GibddExamHandler gibddExamHandler;
+    private final FeedbackHandler feedbackHandler;
 
 
     @Value("${telegram.bot.token}")
@@ -38,9 +39,9 @@ public class PddBot extends TelegramLongPollingBot {
     @PostConstruct
     public void setCommands() {
         List<BotCommand> commands = List.of(
-                new BotCommand("start", "🏠 Перезапуск"),
+                //new BotCommand("start", "🏠 Перезапуск"),
                 new BotCommand("refresh", "🔄 Перезапустить бота"),
-                new BotCommand("help", "❓ Помощь")
+                new BotCommand("help", "❓ Инструкция")
         );
         try {
             SetMyCommands setMyCommands = SetMyCommands.builder()
@@ -65,16 +66,17 @@ public class PddBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        startCommandHandler.handle(this, update);
-        refreshCommandHandler.handle(this, update);
-        helpCommandHandler.handle(this, update);
-        randomExamHandler.handle(this, update);
-        callbackHandler.handle(this, update);
-        errorViewHandler.handle(this, update);
-        ticketListHandler.handle(this, update);
-        statisticsHandler.handle(this, update);
-        recommendationHandler.handle(this, update);
-        gibddExamHandler.handle(this, update);
+        if (startCommandHandler.handle(this, update)) return;
+        if (refreshCommandHandler.handle(this, update)) return;
+        if (helpCommandHandler.handle(this, update)) return;
+        if (feedbackHandler.handle(this, update)) return;
+        if (randomExamHandler.handle(this, update)) return;
+        if (callbackHandler.handle(this, update)) return;
+        if (errorViewHandler.handle(this, update)) return;
+        if (ticketListHandler.handle(this, update)) return;
+        if (statisticsHandler.handle(this, update)) return;
+        if (recommendationHandler.handle(this, update)) return;
+        if (gibddExamHandler.handle(this, update)) return;
     }
 
 
