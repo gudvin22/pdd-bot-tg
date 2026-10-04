@@ -22,7 +22,8 @@ public class CallbackHandler implements UpdateHandler {
     private final TokenStorageService tokenStorageService;
     private final StatisticsService statisticsService;
     private final TrainingService trainingService;
-    private final AdditionalQuestionsService additionalQuestionsService; // ★ добавить
+    private final AdditionalQuestionsService additionalQuestionsService;
+    private final SubscriptionProcessingService subscriptionProcessingService;
 
     @Value("${bot.message.responseRandomQuestion}")
     private String responseMessage;
@@ -54,7 +55,7 @@ public class CallbackHandler implements UpdateHandler {
                 }
             }
 
-            // ★ 2. РЕЖИМ ДОПОЛНИТЕЛЬНЫХ ВОПРОСОВ (ЭКЗАМЕН) ★
+            // 2. РЕЖИМ ДОПОЛНИТЕЛЬНЫХ ВОПРОСОВ (ЭКЗАМЕН)
             ExamSession sessionCheck = sessionStorage.getSession(chatId);
             if (sessionCheck != null
                     && sessionCheck.getAdditionalQuestions() != null
@@ -64,7 +65,7 @@ public class CallbackHandler implements UpdateHandler {
                     additionalQuestionsService.handleAnswer(bot, chatId, userAnswerIndex);
                     return true;
                 }
-                return true; // блокируем другие callback'и в этом режиме
+                return true;
             }
 
             // 3. Обработка выбора билета из списка
@@ -97,6 +98,10 @@ public class CallbackHandler implements UpdateHandler {
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
 
+                if (!subscriptionProcessingService.check(bot, chatId, telegramId, userName)) {
+                    return true;
+                }
+
                 messageSender.sendMessage(bot, chatId, "🧠 Генерирую AI-анализ...");
 
                 try {
@@ -124,12 +129,12 @@ public class CallbackHandler implements UpdateHandler {
                 messageSender.sendMessage(bot, chatId, "Не удалось отправить ответ. Ошибка: " + e.getMessage());
             }
 
-            // Проверяем, что это ответ на вопрос (начинается с "answer_")
+            // Проверяем, что это ответ на вопрос
             if (!callbackData.startsWith("answer_")) {
                 return false;
             }
 
-            // ★ 6. ПРОВЕРКА ВРЕМЕНИ ДЛЯ ЭКЗАМЕНА ★
+            // 6. ПРОВЕРКА ВРЕМЕНИ ДЛЯ ЭКЗАМЕНА
             if (session.isGibddExam()) {
                 long elapsed = System.currentTimeMillis() - session.getStartTime();
                 if (elapsed > 20 * 60 * 1000) {
@@ -161,7 +166,6 @@ public class CallbackHandler implements UpdateHandler {
                     messageSender.sendMessage(bot, chatId, "Не удалось загрузить билет. Ошибка: " + e.getMessage());
                 }
             } else {
-                // Завершили основной билет — выбираем метод проверки
                 String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                 String userName = update.getCallbackQuery().getFrom().getFirstName();
 

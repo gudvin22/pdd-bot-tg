@@ -3,6 +3,7 @@ package com.pdd.pddbottg.handlers;
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.TicketStatusDto;
 import com.pdd.pddbottg.service.MessageSender;
+import com.pdd.pddbottg.service.SubscriptionProcessingService;
 import com.pdd.pddbottg.service.TicketProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,9 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class TicketListHandler implements UpdateHandler {
-    private final TicketProcessingService  ticketProcessingService;
+    private final TicketProcessingService ticketProcessingService;
     private final MessageSender messageSender;
+    private final SubscriptionProcessingService subscriptionProcessingService;
 
     @Override
     public boolean handle(PddBot bot, Update update) {
@@ -28,10 +30,12 @@ public class TicketListHandler implements UpdateHandler {
             String firstName = update.getMessage().getFrom().getFirstName();
 
             if ("📚 Все билеты".equals(text)) {
+                if (!subscriptionProcessingService.check(bot, chatId, telegramId, firstName)) {
+                    return true;
+                }
                 List<TicketStatusDto> statuses = ticketProcessingService.getTicketsStatus(telegramId, firstName);
                 StringBuilder sb = new StringBuilder("📚 Все билеты\n\n");
 
-                //создаем клавиатуру с билетами
                 InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
                 List<List<InlineKeyboardButton>> rows = new ArrayList<>();
                 List<InlineKeyboardButton> currentRow = new ArrayList<>();
@@ -45,19 +49,17 @@ public class TicketListHandler implements UpdateHandler {
                         default -> "⚪";
                     };
 
-                    // Создаём кнопку
                     InlineKeyboardButton button = new InlineKeyboardButton();
                     button.setText(emoji + " " + dto.getTicketNumber());
                     button.setCallbackData("ticket_" + dto.getTicketNumber());
                     currentRow.add(button);
 
                     counter++;
-                    if (counter % 8 == 0) { // каждые 5 кнопок – новый ряд
+                    if (counter % 8 == 0) {
                         rows.add(currentRow);
                         currentRow = new ArrayList<>();
                     }
                 }
-                // Добавляем последний ряд, если он непустой
                 if (!currentRow.isEmpty()) {
                     rows.add(currentRow);
                 }
@@ -65,19 +67,12 @@ public class TicketListHandler implements UpdateHandler {
                 sb.append("✅ — решён без ошибок\n");
                 sb.append("❌ — есть ошибки\n");
                 sb.append("⚪ — не решён\n");
-                                // Отправляем
-                messageSender.sendMessageInlineKeyboard(bot, chatId, sb.toString(), keyboard);
 
+                messageSender.sendMessageInlineKeyboard(bot, chatId, sb.toString(), keyboard);
 
                 return true;
             }
         }
         return false;
     }
-
-
-
-
-
-
 }

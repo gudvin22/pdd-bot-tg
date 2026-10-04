@@ -4,6 +4,7 @@ import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.RecommendationQuestionDto;
 import com.pdd.pddbottg.service.MessageSender;
 import com.pdd.pddbottg.service.SessionStorage;
+import com.pdd.pddbottg.service.SubscriptionProcessingService;
 import com.pdd.pddbottg.service.TicketProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ public class RecommendationHandler implements UpdateHandler {
     private final TicketProcessingService ticketProcessingService;
     private final MessageSender messageSender;
     private final SessionStorage sessionStorage;
+    private final SubscriptionProcessingService subscriptionProcessingService;
 
     @Override
     public boolean handle(PddBot bot, Update update) {
@@ -27,6 +29,9 @@ public class RecommendationHandler implements UpdateHandler {
             String userName = update.getMessage().getFrom().getFirstName();
 
             if ("🎯 Рекомендация".equals(text)) {
+                if (!subscriptionProcessingService.check(bot, chatId, telegramId, userName)) {
+                    return true;
+                }
                 try {
                     List<RecommendationQuestionDto> questions = ticketProcessingService.getRecommendedQuestions(telegramId, userName);
 

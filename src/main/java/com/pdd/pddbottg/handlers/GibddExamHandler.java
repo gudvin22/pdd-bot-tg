@@ -7,6 +7,7 @@ import com.pdd.pddbottg.dto.QuestionDto;
 import com.pdd.pddbottg.entity.ExamSession;
 import com.pdd.pddbottg.service.MessageSender;
 import com.pdd.pddbottg.service.SessionStorage;
+import com.pdd.pddbottg.service.SubscriptionProcessingService;
 import com.pdd.pddbottg.service.TicketProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ public class GibddExamHandler implements UpdateHandler {
     private final MessageSender messageSender;
     private final TicketProcessingService ticketProcessingService;
     private final SessionStorage sessionStorage;
+    private final SubscriptionProcessingService subscriptionProcessingService;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -31,11 +33,13 @@ public class GibddExamHandler implements UpdateHandler {
             String firstName = update.getMessage().getFrom().getFirstName();
 
             if ("📝 Режим экзамена".equals(text)) {
+                if (!subscriptionProcessingService.check(bot, chatId, telegramId, firstName)) {
+                    return true;
+                }
                 try {
                     String json = ticketProcessingService.randomExam(telegramId, firstName);
                     ExamResponseDto ticketResponse = objectMapper.readValue(json, ExamResponseDto.class);
 
-                    // Сохраняем сессию с временем начала
                     ExamSession sessionMap = new ExamSession(
                             ticketResponse.getTicketNumber(),
                             ticketResponse.getQuestions(),

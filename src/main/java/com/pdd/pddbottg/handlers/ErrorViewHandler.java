@@ -25,6 +25,7 @@ public class ErrorViewHandler implements UpdateHandler{
     private final KeyboardService keyboardService;
     private final AiTicketAnalysisService aiTicketAnalysisService;
     private final TicketProcessingService ticketProcessingService;
+    private final SubscriptionProcessingService subscriptionProcessingService;
 
     @Value("${bot.message.responseRandomTicketErrorSession}")
     private String responseRandomTicketErrorSession;
@@ -47,9 +48,8 @@ public class ErrorViewHandler implements UpdateHandler{
             }
 
             switch (callbackData)
-                {
+            {
                 case "view_errors": {
-                    //messageSender.sendMessage(bot, chatId,"Показываем ошибки");
                     showError(bot, chatId, session, 0);
                     break;
                 }
@@ -68,12 +68,16 @@ public class ErrorViewHandler implements UpdateHandler{
                 case "get_ai_analysis": {
                     String telegramId = String.valueOf(update.getCallbackQuery().getFrom().getId());
                     String userName = update.getCallbackQuery().getFrom().getFirstName();
-                    //messageSender.sendMessage(bot, chatId,"AI анализ в разработке");
+
+                    if (!subscriptionProcessingService.check(bot, chatId, telegramId, userName)) {
+                        break;
+                    }
+
                     getAiAnalysis(bot, chatId, session, telegramId, userName);
                     break;
                 }
 
-                }
+            }
 
         }
 
@@ -83,7 +87,6 @@ public class ErrorViewHandler implements UpdateHandler{
     private void showError(PddBot bot, Long chatId, ExamSession session, int index) {
         List<WrongAnswerDto> wrongAnswers = session.getWrongAnswers();
         if(wrongAnswers == null || wrongAnswers.isEmpty() || index >= wrongAnswers.size()) {
-            //messageSender.sendMessage(bot, chatId, "Ошибок нет.");
             sessionStorage.removeSession(chatId);
             return;
         }
@@ -91,7 +94,6 @@ public class ErrorViewHandler implements UpdateHandler{
         session.setCurrentErrorIndex(index);
         WrongAnswerDto error = wrongAnswers.get(index);
 
-        //Найти вопрос
         QuestionDto question = session.getQuestions().stream()
                 .filter(q -> q.getQuestionNumber() == error.getQuestionNumber())
                 .findFirst()
@@ -101,7 +103,6 @@ public class ErrorViewHandler implements UpdateHandler{
             return;
         }
 
-        //текст
         StringBuilder text = new StringBuilder();
         text.append("Ошибка ").append(index + 1).append(" из ")
                 .append(wrongAnswers.size()).append("\n");
@@ -122,7 +123,6 @@ public class ErrorViewHandler implements UpdateHandler{
         }
         text.append("\n<b>Объяснение:</b>\n").append(error.getExplanation());
 
-        //клавиатура
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
@@ -142,7 +142,6 @@ public class ErrorViewHandler implements UpdateHandler{
         rows.add(row);
         keyboard.setKeyboard(rows);
 
-        // Картинка
         String imageUrl = question.getImageUrlSmall();
         if (imageUrl != null && !imageUrl.isEmpty()) {
             try {
@@ -167,13 +166,11 @@ public class ErrorViewHandler implements UpdateHandler{
 
 
         try {
-            // Отправляем запрос на сервер
             String analysis = ticketProcessingService.getAiAnalysis(telegramId, userName, requestDto);
             messageSender.sendMessage(bot, chatId, analysis);
         } catch (Exception e) {
             messageSender.sendMessage(bot, chatId, "❌ Ошибка: " + e.getMessage());
         } finally {
-            // Сессию удаляем здесь, чтобы не дублировать в кейсе
             sessionStorage.removeSession(chatId);
         }
     }
