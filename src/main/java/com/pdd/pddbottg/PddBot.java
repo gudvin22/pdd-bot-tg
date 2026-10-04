@@ -29,6 +29,7 @@ public class PddBot extends TelegramLongPollingBot {
     private final RecommendationHandler recommendationHandler;
     private final GibddExamHandler gibddExamHandler;
     private final FeedbackHandler feedbackHandler;
+    private final SubscriptionHandler subscriptionHandler;
 
 
     @Value("${telegram.bot.token}")
@@ -70,6 +71,7 @@ public class PddBot extends TelegramLongPollingBot {
         if (refreshCommandHandler.handle(this, update)) return;
         if (helpCommandHandler.handle(this, update)) return;
         if (feedbackHandler.handle(this, update)) return;
+        if (subscriptionHandler.handle(this, update)) return;
         if (randomExamHandler.handle(this, update)) return;
         if (callbackHandler.handle(this, update)) return;
         if (errorViewHandler.handle(this, update)) return;

@@ -68,4 +68,18 @@ public class KeyboardService {
         keyboard.setKeyboard(rows);
         return keyboard;
     }
+
+    public InlineKeyboardMarkup activateSubscriptionKeyboard() {
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText("⭐ Активировать подписку");
+        button.setCallbackData("activate_subscription");
+        row.add(button);
+        rows.add(row);
+        keyboard.setKeyboard(rows);
+        return keyboard;
+    }
 }
