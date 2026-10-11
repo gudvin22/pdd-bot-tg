@@ -37,3 +37,12 @@ build/
 *.db
 *.db-shm
 *.db-wal
+
+### Env ###
+.env
+.env.*
+!.env.example
+
+### Logs ###
+*.log
+logs/
