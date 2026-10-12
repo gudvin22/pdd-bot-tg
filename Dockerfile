@@ -7,7 +7,8 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN cp src/main/resources/application.properties.example src/main/resources/application.properties && \
+    mvn clean package -DskipTests
 
 # ========== Этап 2: Запуск ==========
 FROM eclipse-temurin:17-jre
