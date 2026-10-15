@@ -66,22 +66,13 @@ public class MessageSender {
 
 
     public void sendFoto(PddBot bot, Long chatId, String imageUrl) throws IOException {
-
-        String fullImageUrl = serverAddress + imageUrl;
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId.toString());
 
-        //отправка файла напрямую пока localhost для тестов,
-        // при деплое удалить вместе с папкой static.images-bilety
-        if(serverAddress.contains("localhost")){
-            String fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("static/images-bilety/" + fileName);
-            InputFile inputFile = new InputFile(resource.getInputStream(), fileName);
-            sendPhoto.setPhoto(inputFile);
-        }   else  {
-            //------------------------------------------------------
-            sendPhoto.setPhoto(new InputFile(fullImageUrl));
-        }
+        String fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+        org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("static/images-bilety/" + fileName);
+        InputFile inputFile = new InputFile(resource.getInputStream(), fileName);
+        sendPhoto.setPhoto(inputFile);
 
         try {
             bot.execute(sendPhoto);
