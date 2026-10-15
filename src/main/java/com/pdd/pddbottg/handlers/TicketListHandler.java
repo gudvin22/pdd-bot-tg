@@ -55,7 +55,7 @@ public class TicketListHandler implements UpdateHandler {
                     currentRow.add(button);
 
                     counter++;
-                    if (counter % 8 == 0) {
+                    if (counter % 5 == 0) {
                         rows.add(currentRow);
                         currentRow = new ArrayList<>();
                     }

@@ -40,8 +40,8 @@ public class PddBot extends TelegramLongPollingBot {
     @PostConstruct
     public void setCommands() {
         List<BotCommand> commands = List.of(
-                //new BotCommand("start", "🏠 Перезапуск"),
-                new BotCommand("refresh", "🔄 Перезапустить бота"),
+                new BotCommand("start", "🏠 Перезапуск бота"),
+                new BotCommand("refresh", "🔄 Обновить бота"),
                 new BotCommand("help", "❓ Инструкция")
         );
         try {
