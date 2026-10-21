@@ -2,9 +2,9 @@ package com.pdd.pddbottg.handlers;
 
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.SubscriptionDto;
-import com.pdd.pddbottg.service.KeyboardService;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.SubscriptionProcessingService;
+import com.pdd.pddbottg.KeyboardService;
+import com.pdd.pddbottg.MessageSender;
+import com.pdd.pddbottg.SubscriptionProcessingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

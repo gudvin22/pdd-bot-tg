@@ -1,8 +1,7 @@
-package com.pdd.pddbottg.service;
+package com.pdd.pddbottg;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.SubscriptionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,5 @@
-package com.pdd.pddbottg.service;
+package com.pdd.pddbottg;
 
-import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.QuestionDto;
 import com.pdd.pddbottg.entity.ExamSession;
 import lombok.RequiredArgsConstructor;

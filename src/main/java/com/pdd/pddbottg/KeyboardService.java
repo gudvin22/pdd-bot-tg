@@ -1,4 +1,4 @@
-package com.pdd.pddbottg.service;
+package com.pdd.pddbottg;
 
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;

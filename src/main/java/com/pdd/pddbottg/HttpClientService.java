@@ -1,4 +1,4 @@
-package com.pdd.pddbottg.service;
+package com.pdd.pddbottg;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

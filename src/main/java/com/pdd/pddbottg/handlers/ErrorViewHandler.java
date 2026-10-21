@@ -1,10 +1,9 @@
 package com.pdd.pddbottg.handlers;
 
 
-import com.pdd.pddbottg.PddBot;
+import com.pdd.pddbottg.*;
 import com.pdd.pddbottg.dto.AiAnalysisTicketRequestDto;
 import com.pdd.pddbottg.entity.ExamSession;
-import com.pdd.pddbottg.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

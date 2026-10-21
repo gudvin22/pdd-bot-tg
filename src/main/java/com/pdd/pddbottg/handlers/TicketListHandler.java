@@ -2,9 +2,9 @@ package com.pdd.pddbottg.handlers;
 
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.TicketStatusDto;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.SubscriptionProcessingService;
-import com.pdd.pddbottg.service.TicketProcessingService;
+import com.pdd.pddbottg.MessageSender;
+import com.pdd.pddbottg.SubscriptionProcessingService;
+import com.pdd.pddbottg.TicketProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;

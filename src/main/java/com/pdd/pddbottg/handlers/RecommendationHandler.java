@@ -2,10 +2,10 @@ package com.pdd.pddbottg.handlers;
 
 import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.RecommendationQuestionDto;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.SessionStorage;
-import com.pdd.pddbottg.service.SubscriptionProcessingService;
-import com.pdd.pddbottg.service.TicketProcessingService;
+import com.pdd.pddbottg.MessageSender;
+import com.pdd.pddbottg.SessionStorage;
+import com.pdd.pddbottg.SubscriptionProcessingService;
+import com.pdd.pddbottg.TicketProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;

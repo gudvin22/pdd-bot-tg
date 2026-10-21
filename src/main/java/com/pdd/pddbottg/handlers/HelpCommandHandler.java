@@ -1,12 +1,12 @@
 package com.pdd.pddbottg.handlers;
 
 import com.pdd.pddbottg.PddBot;
-import com.pdd.pddbottg.service.MessageSender;
+import com.pdd.pddbottg.MessageSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+
 @Component
 @RequiredArgsConstructor
 public class HelpCommandHandler implements UpdateHandler {

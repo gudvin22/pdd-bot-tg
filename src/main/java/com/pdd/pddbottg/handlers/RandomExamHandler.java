@@ -4,18 +4,13 @@ import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.ExamResponseDto;
 import com.pdd.pddbottg.dto.QuestionDto;
 import com.pdd.pddbottg.entity.ExamSession;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.SessionStorage;
-import com.pdd.pddbottg.service.TicketProcessingService;
-import com.pdd.pddbottg.service.TokenStorageService;
+import com.pdd.pddbottg.MessageSender;
+import com.pdd.pddbottg.SessionStorage;
+import com.pdd.pddbottg.TicketProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor

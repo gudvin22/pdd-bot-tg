@@ -1,6 +1,5 @@
-package com.pdd.pddbottg.service;
+package com.pdd.pddbottg;
 
-import com.pdd.pddbottg.PddBot;
 import com.pdd.pddbottg.dto.RecommendationQuestionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

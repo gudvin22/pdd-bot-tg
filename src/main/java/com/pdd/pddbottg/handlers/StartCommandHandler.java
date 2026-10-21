@@ -1,10 +1,10 @@
 package com.pdd.pddbottg.handlers;
 
 import com.pdd.pddbottg.PddBot;
-import com.pdd.pddbottg.service.AuthService;
-import com.pdd.pddbottg.service.KeyboardService;
-import com.pdd.pddbottg.service.MessageSender;
-import com.pdd.pddbottg.service.TokenStorageService;
+import com.pdd.pddbottg.AuthService;
+import com.pdd.pddbottg.KeyboardService;
+import com.pdd.pddbottg.MessageSender;
+import com.pdd.pddbottg.TokenStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

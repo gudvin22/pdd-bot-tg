@@ -1,4 +1,4 @@
-package com.pdd.pddbottg.service;
+package com.pdd.pddbottg;
 
 import com.pdd.pddbottg.PddBot;
 import org.springframework.beans.factory.annotation.Value;
